@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+out/
+*.tgz
+
+# Turborepo
+.turbo/
+
+# Vite
+.vite/
+
+# TypeScript
+*.tsbuildinfo
+
+# Code coverage
+coverage/
+*.lcov
+
+# Logs
+logs/
+*.log
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Caches
+.cache/
+.eslintcache/
+.oxlint_cache/
+
+# IDE
+.idea/
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db

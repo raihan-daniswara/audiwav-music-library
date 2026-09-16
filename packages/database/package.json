@@ -1,0 +1,26 @@
+{
+  "name": "@audiwav/database",
+  "private": true,
+  "type": "module",
+  "module": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "drizzle-orm": "latest",
+    "postgres": "latest"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "drizzle-kit": "latest",
+    "typescript": "latest"
+  }
+}
