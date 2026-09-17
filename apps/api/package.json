@@ -1,10 +1,16 @@
 {
   "name": "@audiwav/api",
-  "module": "index.ts",
-  "type": "module",
   "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target bun",
+    "typecheck": "tsc --noEmit",
+    "lint": "oxlint"
+  },
   "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "latest"
+    "@types/bun": "1.4.2",
+    "oxlint": "1.83.0",
+    "typescript": "7.0.2"
   }
 }

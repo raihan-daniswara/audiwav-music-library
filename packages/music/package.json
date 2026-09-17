@@ -13,6 +13,6 @@
     "@audiwav/shared": "workspace:*"
   },
   "devDependencies": {
-    "typescript": "latest"
+    "typescript": "^7.0.2"
   }
 }

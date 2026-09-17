@@ -3,8 +3,8 @@
   "compilerOptions": {
     "types": ["bun"],
     "paths": {
-      "@/*": ["./src/*"]
-    }
+      "@/*": ["./src/*"],
+    },
   },
-  "include": ["src/**/*.ts", "index.ts"]
+  "include": ["src/**/*.ts"]
 }

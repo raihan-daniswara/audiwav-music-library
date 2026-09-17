@@ -7,6 +7,9 @@
     "lib": ["ES2023", "DOM"],
     "module": "ESNext",
     "types": ["vite/client"],
+    "paths": {
+      "@/*": ["./src/*"],
+    },
 
     "allowArbitraryExtensions": true,
     "skipLibCheck": true,
@@ -23,7 +26,7 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
   },
-  "include": ["src"]
+  "include": ["src"],
 }
