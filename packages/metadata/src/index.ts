@@ -1,9 +1,26 @@
-export {
-  findByArtistAndTitle,
-  findByTitle,
-  findByTitleAndRelease,
-} from "./canonical/search";
+// Export Canonical provider.
+export { createCanonicalClient, searchCanonical } from "./canonical";
 
-export { searchRecording } from "./musicbrainz/search";
+export type {
+  CanonicalClient,
+  CanonicalClientOptions,
+  CanonicalSearchOptions,
+  CanonicalSearchResult,
+} from "./canonical";
 
-export { lookupRecording } from "./musicbrainz/lookup";
+// Export iTunes provider.
+export { ITunesClient, searchITunes, searchITunesByMetadata } from "./itunes";
+
+export type {
+  ITunesSearchOptions,
+  ITunesSearchResult,
+  ITunesSearchResponse,
+} from "./itunes";
+
+// Export MusicBrainz provider.
+export { MusicBrainzClient, searchMusicBrainz } from "./musicbrainz";
+
+export type {
+  MusicBrainzRecordingResponse,
+  MusicBrainzSearchResult,
+} from "./musicbrainz";

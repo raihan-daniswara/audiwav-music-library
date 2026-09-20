@@ -1,32 +1,33 @@
-import { musicBrainzFetch } from "./client";
+import { MusicBrainzClient } from "./client";
+import type { MusicBrainzSearchResult } from "./types";
 
-interface RecordingSearchResponse {
-  recordings: Array<{
-    id: string;
-    title: string;
-    length?: number;
-    score: number;
-    "artist-credit"?: Array<{
-      name: string;
-      artist: {
-        id: string;
-        name: string;
-      };
-    }>;
-  }>;
+/**
+ * Mencari metadata recording berdasarkan Recording MBID.
+ */
+export async function searchMusicBrainz(
+  recordingMbid: string,
+): Promise<MusicBrainzSearchResult | undefined> {
+  if (!recordingMbid) {
+    return undefined;
+  }
 
-  count: number;
-  offset: number;
-}
+  const client = new MusicBrainzClient();
 
-export async function searchRecording(title: string, artist?: string) {
-  const query = artist
-    ? `recording:"${title}" AND artist:"${artist}"`
-    : `recording:"${title}"`;
+  const result = await client.getRecording(recordingMbid);
 
-  return musicBrainzFetch<RecordingSearchResponse>("recording", {
-    query,
-    fmt: "json",
-    limit: "25",
-  });
+  const release = result.releases?.[0];
+  const releaseDate = result["first-release-date"] ?? release?.date;
+
+  return {
+    recordingMbid: result.id,
+
+    durationMs: result.length,
+
+    releaseDate,
+    releaseYear: releaseDate ? new Date(releaseDate).getFullYear() : undefined,
+
+    releaseMbid: release?.id,
+    releaseName: release?.title,
+    trackCount: release?.["track-count"],
+  };
 }

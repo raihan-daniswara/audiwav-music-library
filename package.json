@@ -1,21 +1,21 @@
 {
   "name": "audiwav-music-library",
-  "private": true,
+  "devDependencies": {
+    "@types/bun": "^1.4.2",
+    "prettier": "^3.9.7",
+    "turbo": "^2.10.13",
+    "typescript": "^7.0.2"
+  },
   "packageManager": "bun@1.4.0",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "private": true,
   "scripts": {
     "dev": "turbo dev",
     "build": "turbo build",
     "typecheck": "turbo typecheck",
     "lint": "turbo lint"
   },
-  "devDependencies": {
-    "@types/bun": "^1.4.2",
-    "prettier": "^3.9.7",
-    "turbo": "^2.10.13",
-    "typescript": "^7.0.2"
-  }
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

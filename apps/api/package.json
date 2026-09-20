@@ -3,8 +3,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "bun --watch src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target bun",
+    "dev": "bun --watch --env-file=../../.env src/index.ts",
+    "build": "bun build --env-file=../../.env src/index.ts --outdir dist --target bun",
     "typecheck": "tsc --noEmit",
     "lint": "oxlint"
   },
@@ -12,5 +12,11 @@
     "@types/bun": "1.4.2",
     "oxlint": "1.83.0",
     "typescript": "7.0.2"
+  },
+  "dependencies": {
+    "@audiwav/logger": "workspace:*",
+    "@audiwav/metadata": "workspace:*",
+    "hono": "^4.13.8",
+    "zod": "^4.6.5"
   }
 }

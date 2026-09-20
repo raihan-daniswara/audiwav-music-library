@@ -1,9 +1,24 @@
 import postgres from "postgres";
+import { logger } from "@audiwav/logger";
 
-const databaseUrl = Bun.env.MUSICBRAINZ_DATABASE_URL;
+import type { CanonicalClient, CanonicalClientOptions } from "./types";
 
-if (!databaseUrl) {
-  throw new Error("MUSICBRAINZ_DATABASE_URL is not defined");
+/**
+ * Membuat client PostgreSQL untuk database Canonical.
+ */
+export function createCanonicalClient(
+  options: CanonicalClientOptions,
+): CanonicalClient {
+  const client = postgres(options.connectionString, {
+    max: options.maxConnections ?? 5,
+  });
+
+  logger.debug(
+    {
+      provider: "canonical",
+    },
+    "Canonical database client created",
+  );
+
+  return client;
 }
-
-export const canonicalDb = postgres(databaseUrl);
