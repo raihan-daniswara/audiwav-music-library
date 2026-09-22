@@ -1,8 +1,12 @@
-// Export metadata search service.
+// Export metadata search & detail services.
 export { MetadataSearchService } from "./search";
+export type { MetadataSearchDependencies } from "./search";
 
-// Export service dependencies.
-export type { MetadataSearchServiceDependencies } from "./search";
+export { MetadataDetailService } from "./detail";
+export type {
+  MetadataDetailDependencies,
+  MetadataDetailOptions,
+} from "./detail";
 
 // Export shared metadata types.
 export type {

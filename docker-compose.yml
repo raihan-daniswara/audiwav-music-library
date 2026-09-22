@@ -12,5 +12,39 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql
 
+  rustfs:
+    image: rustfs/rustfs:latest
+    container_name: audiwav-rustfs
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY:-audiwavaccess}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY:-audiwavsecretkey123}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - rustfs_data:/data
+
+  slskd:
+    image: slskd/slskd:latest
+    container_name: audiwav-slskd
+    restart: unless-stopped
+    environment:
+      SLSKD_REMOTE_CONFIGURATION: "true"
+      SLSKD_USERNAME: ${SLSKD_USERNAME:-admin}
+      SLSKD_PASSWORD: ${SLSKD_PASSWORD:-audiwavadmin123}
+      SLSKD_API_KEY: ${SLSKD_API_KEY:-audiwavslskdapikey123}
+      SLSKD_SLSK_USERNAME: ${SLSKD_SLSK_USERNAME:-}
+      SLSKD_SLSK_PASSWORD: ${SLSKD_SLSK_PASSWORD:-}
+    ports:
+      - "5030:5030"     # Web UI & REST API
+      - "50300:50300"   # Soulseek P2P Port
+    volumes:
+      - slskd_data:/app
+      - slskd_downloads:/app/downloads
+
 volumes:
   postgres_data:
+  rustfs_data:
+  slskd_data:
+  slskd_downloads:

@@ -7,8 +7,10 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "test": "bun run src/test.ts",
     "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@audiwav/logger": "workspace:*"
   },
   "devDependencies": {
     "@types/bun": "latest",

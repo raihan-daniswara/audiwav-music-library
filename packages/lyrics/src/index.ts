@@ -1,64 +1,26 @@
-import type { LyricLine } from "./types";
+export * from "./core";
+export * from "./lrclib/client";
+export * from "./netease/client";
+export * from "./ovh/client";
 
-const LRC_TIMESTAMP = /^\[(\d{1,3}):(\d{1,2})(?:\.(\d{1,3}))?\]\s*(.*)$/;
+import { LyricFinder } from "./core";
+import { LrcLibProvider } from "./lrclib/client";
+import { NetEaseProvider } from "./netease/client";
+import { LyricsOvhProvider } from "./ovh/client";
 
-function timestampToMs(
-  minutes: string,
-  seconds: string,
-  fraction?: string,
-): number {
-  const minuteMs = Number(minutes) * 60_000;
-  const secondMs = Number(seconds) * 1_000;
-
-  if (!fraction) {
-    return minuteMs + secondMs;
-  }
-
-  const fractionMs =
-    fraction.length === 1
-      ? Number(fraction) * 100
-      : fraction.length === 2
-        ? Number(fraction) * 10
-        : Number(fraction.slice(0, 3));
-
-  return minuteMs + secondMs + fractionMs;
-}
-
-export function parseLrc(lrc: string): LyricLine[] {
-  const lines: LyricLine[] = [];
-
-  for (const rawLine of lrc.split(/\r?\n/)) {
-    const match = rawLine.match(LRC_TIMESTAMP);
-
-    if (!match) {
-      continue;
-    }
-
-    const minutes = match[1];
-    const seconds = match[2];
-    const fraction = match[3];
-    const text = match[4];
-
-    if (minutes === undefined || seconds === undefined || text === undefined) {
-      continue;
-    }
-
-    lines.push({
-      text: text.trim(),
-      startMs: timestampToMs(minutes, seconds, fraction),
-    });
-  }
-
-  lines.sort((a, b) => a.startMs - b.startMs);
-
-  for (let index = 0; index < lines.length - 1; index++) {
-    const current = lines[index];
-    const next = lines[index + 1];
-
-    if (current && next) {
-      current.endMs = next.startMs;
-    }
-  }
-
-  return lines;
+/**
+ * Helper function untuk menginisialisasi LyricFinder 
+ * dengan kombinasi provider default terbaik.
+ * 
+ * Urutan Fallback Default:
+ * 1. LRCLIB (Kualitas sinkronisasi paling akurat / standar industri open-source)
+ * 2. NetEase (Fallback Sync yang andal + opsi karaoke word-by-word)
+ * 3. Lyrics.ovh (Fallback terakhir jika lirik sama sekali tidak ditemukan, akan mereturn lirik Text/Statik).
+ */
+export function createDefaultLyricFinder(): LyricFinder {
+  return new LyricFinder([
+    new LrcLibProvider(),
+    new NetEaseProvider(),
+    new LyricsOvhProvider(),
+  ]);
 }

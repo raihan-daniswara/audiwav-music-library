@@ -5,6 +5,7 @@ import type {
   CanonicalSearchOptions,
   CanonicalSearchResult,
 } from "./types";
+import { sortCanonicalResults } from "./weighting";
 
 function normalizeLookup(value: string): string {
   return value
@@ -19,6 +20,7 @@ export async function searchCanonical(
   options: CanonicalSearchOptions,
 ): Promise<CanonicalSearchResult[]> {
   const lookup = normalizeLookup(options.query);
+  const rawQuery = options.query.trim();
   const limit = Math.min(options.limit ?? 10, 50);
 
   if (!lookup) {
@@ -36,7 +38,11 @@ export async function searchCanonical(
   );
 
   try {
-    // Exact lookup menggunakan B-tree index.
+    // Ambil candidate secukupnya dari Postgres menggunakan Index (B-Tree/GIN)
+    // agar query PostgreSQL tetap berkecepatan tinggi (<10ms).
+    const fetchLimit = Math.min(limit * 3, 50);
+
+    // 1. Exact lookup menggunakan B-tree index pada combined_lookup.
     const exactResults = await client<CanonicalSearchResult[]>`
       SELECT
         id,
@@ -52,26 +58,28 @@ export async function searchCanonical(
       FROM public.canonical_musicbrainz_data
       WHERE combined_lookup = ${lookup}
       ORDER BY score ASC
-      LIMIT ${limit}
+      LIMIT ${fetchLimit}
     `;
 
     if (exactResults.length > 0) {
+      // Lakukan re-sorting di memori Bun/JS (sangat cepat ~0.1ms):
+      // Judul sama -> score terkecil. Judul beda -> weighted score.
+      const sortedExact = sortCanonicalResults(exactResults, rawQuery, lookup);
+
       logger.debug(
         {
           provider: "canonical",
           query: options.query,
-          resultCount: exactResults.length,
+          resultCount: sortedExact.length,
           matchType: "exact",
         },
         "Canonical exact search completed",
       );
 
-      return exactResults;
+      return sortedExact.slice(0, limit);
     }
 
-    // Fuzzy lookup menggunakan GIN trigram index.
-    // Threshold rendah digunakan agar typo/reversed query tetap
-    // dapat masuk sebagai candidate untuk ranking berikutnya.
+    // 2. Fuzzy lookup menggunakan GIN trigram index pada combined_lookup.
     await client`
       SELECT set_limit(0.3)
     `;
@@ -91,20 +99,23 @@ export async function searchCanonical(
       FROM public.canonical_musicbrainz_data
       WHERE combined_lookup % ${lookup}
       ORDER BY score ASC
-      LIMIT ${limit}
+      LIMIT ${fetchLimit}
     `;
+
+    // Re-sorting di memori Bun/JS.
+    const sortedFuzzy = sortCanonicalResults(fuzzyResults, rawQuery, lookup);
 
     logger.debug(
       {
         provider: "canonical",
         query: options.query,
-        resultCount: fuzzyResults.length,
+        resultCount: sortedFuzzy.length,
         matchType: "fuzzy",
       },
       "Canonical fuzzy search completed",
     );
 
-    return fuzzyResults;
+    return sortedFuzzy.slice(0, limit);
   } catch (error) {
     logger.error(
       {
