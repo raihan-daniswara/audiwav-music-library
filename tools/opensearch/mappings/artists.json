@@ -1,0 +1,76 @@
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 0,
+    "analysis": {
+      "analyzer": {
+        "audiwav_text": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "mbid": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "audiwav_text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "sort_name": {
+        "type": "text",
+        "analyzer": "audiwav_text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "aliases": {
+        "type": "nested",
+        "properties": {
+          "name": {
+            "type": "text",
+            "analyzer": "audiwav_text"
+          }
+        }
+      },
+      "tags": {
+        "type": "nested",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "text",
+            "analyzer": "audiwav_text",
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "rating": {
+        "type": "short"
+      },
+      "rating_count": {
+        "type": "integer"
+      }
+    }
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "name": "@audiwav/tools",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "create:indexes": "NODE_TLS_REJECT_UNAUTHORIZED=0 bun --env-file=../.env opensearch/scripts/create-indexes.ts",
+    "index": "NODE_TLS_REJECT_UNAUTHORIZED=0 bun --env-file=../.env opensearch/workers/index.ts",
+    "delete:index": "NODE_TLS_REJECT_UNAUTHORIZED=0 bun --env-file=../.env opensearch/scripts/delete-index.ts"
+  },
+  "dependencies": {
+    "@audiwav/logger": "workspace:*",
+    "postgres": "^3.4.9"
+  }
+}

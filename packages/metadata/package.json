@@ -11,8 +11,9 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "postgres": "3.4.9",
-    "@audiwav/logger": "workspace:*"
+    "@audiwav/logger": "workspace:*",
+    "@opensearch-project/opensearch": "^3.9.0",
+    "postgres": "3.4.9"
   },
   "devDependencies": {
     "@types/bun": "1.4.2",

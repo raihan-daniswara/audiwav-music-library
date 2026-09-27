@@ -6,12 +6,12 @@ import {
   MetadataSearchService,
 } from "../services/metadata";
 
-import { getCanonicalClient } from "../config/metadata";
-
 const metadataQuerySchema = z.object({
   q: z.string().trim().min(1),
   limit: z.coerce.number().int().positive().max(50).optional(),
   country: z.string().trim().min(2).max(2).optional(),
+  // Type filter default 'track' to mimic the original behavior but flexible
+  type: z.enum(["track", "artist", "album"]).optional().default("track"),
 });
 
 const metadataDetailSchema = z.object({
@@ -29,6 +29,7 @@ metadataRoute.get("/search", async (c) => {
     q: c.req.query("q"),
     limit: c.req.query("limit"),
     country: c.req.query("country"),
+    type: c.req.query("type"),
   });
 
   if (!parsed.success) {
@@ -41,13 +42,25 @@ metadataRoute.get("/search", async (c) => {
     );
   }
 
-  const service = new MetadataSearchService({
-    canonical: getCanonicalClient(),
-  });
+  const { q, limit, country, type } = parsed.data;
+  
+  // Instance murni tanpa injeksi canonical
+  const service = new MetadataSearchService();
 
-  const results = await service.search(parsed.data.q, {
-    limit: parsed.data.limit,
-    country: parsed.data.country,
+  if (type === "artist") {
+     const results = await service.searchArtistsRaw(q, limit);
+     return c.json({ results });
+  }
+
+  if (type === "album") {
+     const results = await service.searchAlbumsRaw(q, limit);
+     return c.json({ results });
+  }
+
+  // Jika type === "track" atau default
+  const results = await service.search(q, {
+    limit,
+    country,
   });
 
   return c.json({
@@ -70,13 +83,14 @@ metadataRoute.post("/detail", async (c) => {
   }
 
   const detailService = new MetadataDetailService();
+  
   const enriched = await detailService.getDetail(
     {
       title: parsed.data.title,
       artist: parsed.data.artist,
       album: parsed.data.album,
       recordingMbid: parsed.data.recordingMbid,
-      sources: ["canonical"],
+      sources: ["opensearch"], // Label sumber berubah dari canonical ke opensearch
     },
     { country: parsed.data.country },
   );

@@ -1,13 +1,3 @@
-// Export Canonical provider.
-export { createCanonicalClient, searchCanonical } from "./canonical";
-
-export type {
-  CanonicalClient,
-  CanonicalClientOptions,
-  CanonicalSearchOptions,
-  CanonicalSearchResult,
-} from "./canonical";
-
 // Export iTunes provider.
 export { ITunesClient, searchITunes, searchITunesByMetadata } from "./itunes";
 
@@ -17,10 +7,13 @@ export type {
   ITunesSearchResponse,
 } from "./itunes";
 
-// Export MusicBrainz provider.
-export { MusicBrainzClient, searchMusicBrainz } from "./musicbrainz";
+// Export OpenSearch provider
+export { OpenSearchClient, searchTracks, searchArtists, searchAlbums } from "./opensearch";
+
+export { getCoverArtForRecording } from "./opensearch/artwork";
 
 export type {
-  MusicBrainzRecordingResponse,
-  MusicBrainzSearchResult,
-} from "./musicbrainz";
+  OpenSearchTrackResult,
+  OpenSearchArtistResult,
+  OpenSearchAlbumResult,
+} from "./opensearch";

@@ -1,0 +1,120 @@
+{
+  "settings": {
+    "number_of_shards": 3,
+    "number_of_replicas": 0,
+    "analysis": {
+      "analyzer": {
+        "audiwav_text": {
+          "type": "custom",
+          "tokenizer": "standard",
+          "filter": [
+            "lowercase",
+            "asciifolding"
+          ]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "dynamic": "strict",
+    "properties": {
+      "mbid": {
+        "type": "keyword"
+      },
+      "title": {
+        "type": "text",
+        "analyzer": "audiwav_text",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "album": {
+        "properties": {
+          "name": {
+            "type": "text",
+            "analyzer": "audiwav_text",
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            }
+          },
+          "release_group_mbid": {
+            "type": "keyword"
+          },
+          "artwork_url": {
+            "type": "keyword"
+          }
+        }
+      },
+      "duration_ms": {
+        "type": "integer"
+      },
+      "artist_credit": {
+        "properties": {
+          "display": {
+            "type": "text",
+            "analyzer": "audiwav_text"
+          },
+          "artists": {
+            "type": "nested",
+            "properties": {
+              "mbid": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "text",
+                "analyzer": "audiwav_text",
+                "fields": {
+                  "keyword": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "position": {
+                "type": "integer"
+              }
+            }
+          }
+        }
+      },
+      "aliases": {
+        "type": "nested",
+        "properties": {
+          "name": {
+            "type": "text",
+            "analyzer": "audiwav_text"
+          }
+        }
+      },
+      "isrc": {
+        "type": "keyword"
+      },
+      "tags": {
+        "type": "nested",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "name": {
+            "type": "text",
+            "analyzer": "audiwav_text",
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      },
+      "rating": {
+        "type": "short"
+      },
+      "rating_count": {
+        "type": "integer"
+      }
+    }
+  }
+}
