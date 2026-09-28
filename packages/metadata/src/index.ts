@@ -17,3 +17,6 @@ export type {
   OpenSearchArtistResult,
   OpenSearchAlbumResult,
 } from "./opensearch";
+export * from "./musicbrainz/client";
+export * from "./musicbrainz/detail";
+export * from "./musicbrainz/types";

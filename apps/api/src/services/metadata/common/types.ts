@@ -43,9 +43,13 @@ export interface NormalizedMetadata {
   discCount?: number;
 
   isExplicit?: boolean;
+  artistArtworkUrl?: string;
   artworkUrl?: string;
   sourceUrl?: string;
 
+  tags?: {id: number, name: string}[];
+  isrc?: string[];
+  aliases?: string[];
   sources: MetadataSource[];
 }
 

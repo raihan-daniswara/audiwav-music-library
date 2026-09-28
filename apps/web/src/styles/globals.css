@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0A0A0A;
+  --color-surface: #111111;
+  --color-elevated-surface: #181818;
+}
+
+@layer base {
+  html, body {
+    background-color: var(--color-background);
+    color: white;
+    -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+  }
+}
+
+/* Global Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Explicit class for elements with custom-scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 9999px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Ambient Orbit & Floating Animations */
+@keyframes ambient-orbit-1 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translate(80px, 120px) rotate(0deg) scale(1.15);
+  }
+  66% {
+    transform: translate(-60px, 60px) rotate(0deg) scale(0.9);
+  }
+  100% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes ambient-orbit-2 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+  }
+  33% {
+    transform: translate(-100px, -60px) rotate(0deg) scale(0.95);
+  }
+  66% {
+    transform: translate(70px, -110px) rotate(0deg) scale(1.2);
+  }
+  100% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1);
+  }
+}
+
+@keyframes ambient-orbit-3 {
+  0% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1.1);
+  }
+  50% {
+    transform: translate(120px, -80px) rotate(0deg) scale(0.85);
+  }
+  100% {
+    transform: translate(0px, 0px) rotate(0deg) scale(1.1);
+  }
+}
+
+.animate-orbit-slow {
+  animation: ambient-orbit-1 25s ease-in-out infinite;
+}
+
+.animate-orbit-reverse {
+  animation: ambient-orbit-2 30s ease-in-out infinite;
+}
+
+.animate-orbit-medium {
+  animation: ambient-orbit-3 22s ease-in-out infinite;
+}

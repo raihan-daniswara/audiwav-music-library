@@ -3,6 +3,7 @@ import { ITunesClient, searchTracks, searchArtists, searchAlbums } from "@audiwa
 import { normalizeOpenSearchTrack, normalizeITunes } from "./common/normalizer";
 import { normalizeQuery, parseMetadataQuery } from "./common/query";
 import type { MetadataSearchOptions, MetadataSearchResult, NormalizedMetadata } from "./common/types";
+import { getArtistImageFromWiki } from "./wikimedia/query";
 
 export class MetadataSearchService {
   async search(query: string, options: MetadataSearchOptions = {}): Promise<MetadataSearchResult[]> {
@@ -40,7 +41,20 @@ export class MetadataSearchService {
 
   // ==== METHOD BARU: Pencarian Spesifik ====
   async searchArtistsRaw(query: string, limit: number = 10) {
-    return await searchArtists(query, limit);
+    const osArtists = await searchArtists(query, limit);
+    
+    // Enrich with Wikimedia images in parallel
+    const enrichedArtists = await Promise.all(
+      osArtists.map(async (artist) => {
+        const artworkUrl = await getArtistImageFromWiki(artist.mbid);
+        return {
+          ...artist,
+          artworkUrl
+        };
+      })
+    );
+
+    return enrichedArtists;
   }
 
   async searchAlbumsRaw(query: string, limit: number = 10) {

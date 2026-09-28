@@ -5,12 +5,12 @@ import {
   MetadataDetailService,
   MetadataSearchService,
 } from "../services/metadata";
+import { getArtistImageFromWiki } from "../services/metadata/wikimedia/query";
 
 const metadataQuerySchema = z.object({
   q: z.string().trim().min(1),
   limit: z.coerce.number().int().positive().max(50).optional(),
   country: z.string().trim().min(2).max(2).optional(),
-  // Type filter default 'track' to mimic the original behavior but flexible
   type: z.enum(["track", "artist", "album"]).optional().default("track"),
 });
 
@@ -23,6 +23,16 @@ const metadataDetailSchema = z.object({
 });
 
 export const metadataRoute = new Hono();
+
+metadataRoute.get("/artist/artwork", async (c) => {
+  const mbid = c.req.query("mbid");
+  if (!mbid) {
+    return c.json({ url: null }, 400);
+  }
+
+  const url = await getArtistImageFromWiki(mbid);
+  return c.json({ url });
+});
 
 metadataRoute.get("/search", async (c) => {
   const parsed = metadataQuerySchema.safeParse({
@@ -43,18 +53,18 @@ metadataRoute.get("/search", async (c) => {
   }
 
   const { q, limit, country, type } = parsed.data;
-  
+
   // Instance murni tanpa injeksi canonical
   const service = new MetadataSearchService();
 
   if (type === "artist") {
-     const results = await service.searchArtistsRaw(q, limit);
-     return c.json({ results });
+    const results = await service.searchArtistsRaw(q, limit);
+    return c.json({ results });
   }
 
   if (type === "album") {
-     const results = await service.searchAlbumsRaw(q, limit);
-     return c.json({ results });
+    const results = await service.searchAlbumsRaw(q, limit);
+    return c.json({ results });
   }
 
   // Jika type === "track" atau default
@@ -68,7 +78,7 @@ metadataRoute.get("/search", async (c) => {
   });
 });
 
-metadataRoute.post("/detail", async (c) => {
+metadataRoute.post("/song/detail", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const parsed = metadataDetailSchema.safeParse(body);
 
@@ -83,7 +93,7 @@ metadataRoute.post("/detail", async (c) => {
   }
 
   const detailService = new MetadataDetailService();
-  
+
   const enriched = await detailService.getDetail(
     {
       title: parsed.data.title,

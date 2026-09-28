@@ -1,9 +1,8 @@
 import { logger } from "@audiwav/logger";
-import { searchITunesByMetadata, getCoverArtForRecording } from "@audiwav/metadata";
-import { normalizeITunes } from "./common/normalizer";
-import { normalizeQuery } from "./common/query";
+import { getTrackDetailFromDB } from "@audiwav/metadata";
+import type { TrackDetailResponse } from "@audiwav/metadata";
+import { getArtistImageFromWiki } from "./wikimedia/query";
 import type { NormalizedMetadata } from "./common/types";
-import type { ITunesSearchOptions, ITunesSearchResult } from "@audiwav/metadata";
 
 export interface MetadataDetailOptions {
   country?: string;
@@ -13,95 +12,51 @@ export class MetadataDetailService {
   async getDetail(
     candidate: NormalizedMetadata,
     options: MetadataDetailOptions = {},
-  ): Promise<NormalizedMetadata> {
-    let enriched: NormalizedMetadata = { ...candidate };
-
-    // 1. UTAMA: Tarik Artwork langsung dari Database MusicBrainz kita!
-    if (candidate.recordingMbid) {
-      logger.debug({ recordingMbid: candidate.recordingMbid }, "Mencari Artwork cover di database lokal");
-      try {
-        const dbArtwork = await getCoverArtForRecording(candidate.recordingMbid);
-        if (dbArtwork) {
-          logger.debug({ recordingMbid: candidate.recordingMbid }, "Artwork ditemukan di Database Lokal!");
-          enriched.artworkUrl = dbArtwork;
-        }
-      } catch (e) {
-        logger.warn({ err: e, recordingMbid: candidate.recordingMbid }, "Gagal mencari artwork dari DB");
-      }
+  ): Promise<TrackDetailResponse | { error: string }> { 
+    
+    let mbid = candidate.recordingMbid;
+    
+    if (!mbid) {
+       logger.warn({ mbid: candidate.recordingMbid, title: candidate.title }, "No recordingMbid provided for JSONB detail fetch. Aborting.");
+       return { error: "Mbid required" };
     }
 
-    // 2. Jika artwork masih tidak ketemu di DB lokal (atau meta minim), jadikan iTunes Fallback!
     try {
-      const itunesResults = await searchITunesByMetadata({
-        artist: candidate.artist,
-        title: candidate.title,
-        album: candidate.album,
-        country: options.country,
-        limit: 50,
-      });
+       logger.debug({ mbid }, "Fetching rich metadata payload directly from PostgreSQL...");
+       
+       const payload = await getTrackDetailFromDB(mbid);
+       
+       if (!payload) {
+         logger.warn({ mbid }, "Track MBID not found in PostgreSQL Database!");
+         return { error: "Not found in database" };
+       }
 
-      const itunesMatch = selectITunesMatch(itunesResults, candidate);
+       logger.debug({ mbid, trackTitle: payload.track.title }, "Database payload successfully fetched. Proceeding with Wikimedia logic...");
 
-      if (itunesMatch) {
-         // Hanya timpa metadata yang masih kosong (Agar DB Lokal tetap jadi prioritas)
-         const normalizedItunes = normalizeITunes(itunesMatch);
-         enriched = mergeMetadata(enriched, normalizedItunes);
-         logger.debug({ artist: candidate.artist, title: candidate.title }, "Enriched sisa data metadata menggunakan iTunes (Fallback)");
-      }
-    } catch (error) {
-      logger.warn({ err: error, provider: "itunes", artist: candidate.artist, title: candidate.title }, "iTunes enrichment failed");
+       // Inject Artwork artis (via Wikidata)
+       if (payload.artists && payload.artists.length > 0) {
+         const primaryArtistMbid = payload.artists[0]?.mbid;
+         if (primaryArtistMbid) {
+            try {
+              const artistArt = await getArtistImageFromWiki(primaryArtistMbid);
+              if (artistArt) {
+                 logger.debug({ artistMbid: primaryArtistMbid, imageFound: true }, "Wikimedia SPARQL succeeded in fetching artist portrait.");
+                 if (payload.artists[0]) payload.artists[0].artwork = { url: artistArt };
+              } else {
+                 logger.info({ artistMbid: primaryArtistMbid }, "Wikimedia SPARQL returned no picture for this artist.");
+              }
+            } catch (err) {
+              logger.error({ err, artistMbid: primaryArtistMbid }, "Error extracting Wikimedia SPARQL fallback.");
+            }
+         }
+       }
+       
+       logger.info({ mbid, trackTitle: payload.track.title, loadedArtists: payload.artists.length }, "Track detail enrichment fully complete.");
+       return payload;
+
+    } catch (e) {
+       logger.error({ err: e, mbid }, "Fatal error executing getDetail JSONB aggregator.");
+       return { error: "Internal server error" };
     }
-
-    return enriched;
   }
-}
-
-function selectITunesMatch(
-  results: ITunesSearchResult[],
-  candidate: NormalizedMetadata,
-): ITunesSearchResult | undefined {
-  const artist = normalizeQuery(candidate.artist);
-  const title = normalizeQuery(candidate.title);
-  const album = normalizeQuery(candidate.album);
-
-  const normalizedResults = results.map((result) => ({
-    result,
-    artist: normalizeQuery(result.artistName),
-    title: normalizeQuery(result.trackName),
-    album: normalizeQuery(result.collectionName),
-  }));
-
-  const exactAlbumMatch = normalizedResults.find(
-    (item) => item.artist === artist && item.title === title && item.album === album,
-  );
-  if (exactAlbumMatch) return exactAlbumMatch.result;
-
-  const exactTrackMatch = normalizedResults.find(
-    (item) => item.artist === artist && item.title === title,
-  );
-  if (exactTrackMatch) return exactTrackMatch.result;
-
-  const prefixMatch = normalizedResults.find(
-    (item) => item.artist.startsWith(artist) && item.title.startsWith(title),
-  );
-  return prefixMatch?.result;
-}
-
-function mergeMetadata(base: NormalizedMetadata, enrichment: NormalizedMetadata): NormalizedMetadata {
-  return {
-    ...base,
-    releaseDate: base.releaseDate ?? enrichment.releaseDate,
-    releaseYear: base.releaseYear ?? enrichment.releaseYear,
-    genre: base.genre ?? enrichment.genre,
-    durationMs: base.durationMs ?? enrichment.durationMs,
-    trackNumber: base.trackNumber ?? enrichment.trackNumber,
-    trackCount: base.trackCount ?? enrichment.trackCount,
-    discNumber: base.discNumber ?? enrichment.discNumber,
-    discCount: base.discCount ?? enrichment.discCount,
-    isExplicit: base.isExplicit ?? enrichment.isExplicit,
-    // Jika DB Lokal sudah punya image, TIDAK BOLEH DITIMPA OLEH ITUNES:
-    artworkUrl: base.artworkUrl ?? enrichment.artworkUrl,
-    sourceUrl: base.sourceUrl ?? enrichment.sourceUrl,
-    sources: [...new Set([...base.sources, ...enrichment.sources])],
-  };
 }

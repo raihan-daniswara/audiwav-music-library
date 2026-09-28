@@ -24,6 +24,12 @@ export function normalizeOpenSearchTrack(result: OpenSearchTrackResult): Normali
     recordingMbid: result.mbid,
     durationMs: result.durationMs,
     artworkUrl: artworkUrl || undefined,
+
+    // == FIELDS BARU (FULL RECORD OS) ==
+    tags: result.tags || [],
+    isrc: result.isrc || [],
+    aliases: (result.aliases || []).map((a: any) => typeof a === 'string' ? a : a.name),
+
     sources: ["opensearch"],
   };
 }
