@@ -44,6 +44,7 @@ export interface OpenSearchTrackResult {
 }
 
 export interface OpenSearchArtistResult {
+  artworkUrl?: string;
   mbid: string;
   name: string;
   sort_name: string;

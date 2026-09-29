@@ -41,7 +41,10 @@ export class NetEaseProvider implements LyricProvider {
       });
 
       if (!searchRes.ok) {
-        logger.debug({ status: searchRes.status }, "NetEase search request failed");
+        logger.debug(
+          { status: searchRes.status },
+          "NetEase search request failed",
+        );
         return null;
       }
 
@@ -62,8 +65,8 @@ export class NetEaseProvider implements LyricProvider {
       });
 
       if (!lyricRes.ok) {
-         logger.debug({ status: lyricRes.status }, "NetEase lyric fetch failed");
-         return null;
+        logger.debug({ status: lyricRes.status }, "NetEase lyric fetch failed");
+        return null;
       }
 
       const lyricData = (await lyricRes.json()) as NetEaseLyricResponse;

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { Music } from "lucide-react";
+import { Mic2 } from "lucide-react";
 
 interface ArtistCardProps {
   artistName: string;
@@ -47,7 +47,7 @@ export function ArtistCard({
               transition={{ duration: 0.25 }}
               className="w-full h-full flex items-center justify-center bg-[#292929]"
             >
-              <Music size={32} className="text-white/10" />
+              <Mic2 size={40} className="text-white/10" />
             </motion.div>
           )}
         </AnimatePresence>
@@ -59,41 +59,19 @@ export function ArtistCard({
         </span>
       </div>
 
-      <div className="p-4 flex flex-col gap-3 relative z-10 -mt-2">
-        <div className="flex items-center gap-1.5">
-          <span className="text-[17px] font-bold text-white group-hover:underline cursor-pointer">
-            {artistName}
-          </span>
-        </div>
-
-        {/* Transisi Bio / Annotation dari Skeleton ke Konten Teks */}
-        <AnimatePresence mode="wait">
-          {isLoadingDetail ? (
-            <motion.div
-              key="bio-skeleton"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.15 }}
-              className="flex flex-col gap-2 mt-1"
-            >
-              <div className="h-3 w-full bg-white/10 rounded animate-pulse" />
-              <div className="h-3 w-5/6 bg-white/10 rounded animate-pulse" />
-              <div className="h-3 w-2/3 bg-white/10 rounded animate-pulse" />
-            </motion.div>
-          ) : annotation ? (
-            <motion.p
-              key="bio-content"
-              initial={{ opacity: 0, y: 4 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeOut" }}
-              className="text-[14px] text-white/60 leading-relaxed font-medium line-clamp-4"
-            >
-              {annotation}
-            </motion.p>
-          ) : null}
-        </AnimatePresence>
+      <div className="flex flex-col p-5 pt-3 mb-2">
+        <span className="font-bold text-lg text-white mb-1">{artistName}</span>
+        {isLoadingDetail ? (
+          <div className="flex flex-col gap-1.5 mt-2">
+            <div className="h-3 w-full bg-white/10 rounded animate-pulse" />
+            <div className="h-3 w-5/6 bg-white/10 rounded animate-pulse" />
+            <div className="h-3 w-1/2 bg-white/10 rounded animate-pulse" />
+          </div>
+        ) : annotation ? (
+          <p className="text-sm text-white/50 leading-relaxed font-medium line-clamp-4">
+            {annotation}
+          </p>
+        ) : null}
       </div>
     </div>
   );

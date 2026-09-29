@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { usePlayerStore } from "../../../features/player";
+import { useSearchStore } from "../../../features/search";
+import { useNavigationStore } from "../../../store/useNavigationStore";
 import { AudioQualitySelector } from "./AudioQualitySelector";
 import { VolumeSlider } from "./VolumeSlider";
 import {
@@ -17,11 +19,19 @@ export function BottomPlayer() {
   const isPlaying = usePlayerStore((state) => state.isPlaying);
   const togglePlay = usePlayerStore((state) => state.togglePlay);
 
+  const setQuery = useSearchStore((state) => state.setQuery);
+  const navigate = useNavigationStore((state) => state.navigate);
+
   const [imageError, setImageError] = useState(false);
 
   useEffect(() => {
     setImageError(false);
   }, [currentTrack?.artworkUrl, currentTrack?.id]);
+
+  const handleSearchClick = (keyword: string) => {
+    setQuery(keyword);
+    navigate("search");
+  };
 
   return (
     <footer className="h-[90px] border-t border-white/10 bg-surface/90 backdrop-blur-xl flex items-center justify-between px-4 sm:px-6 shrink-0 relative z-50 select-none">
@@ -42,11 +52,21 @@ export function BottomPlayer() {
 
         <div className="flex flex-col truncate">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold truncate hover:underline cursor-pointer">
+            <span 
+              onClick={() => {
+                if (currentTrack?.title) handleSearchClick(`${currentTrack.title} ${currentTrack.artist || ''}`);
+              }}
+              className="text-sm font-semibold truncate hover:underline cursor-pointer"
+            >
               {currentTrack?.title || "No Track Selected"}
             </span>
           </div>
-          <span className="text-xs text-white/70 truncate hover:underline cursor-pointer">
+          <span 
+            onClick={() => {
+              if (currentTrack?.artist) handleSearchClick(currentTrack.artist);
+            }}
+            className="text-xs text-white/70 truncate hover:underline cursor-pointer"
+          >
             {currentTrack?.artist || "-"}
           </span>
         </div>
@@ -58,44 +78,40 @@ export function BottomPlayer() {
           <button
             type="button"
             aria-label="Shuffle playback"
-            className="text-white/70 hover:text-white p-2 min-w-0 rounded-full h-auto cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/30"
+            className="text-white/50 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-white/30 rounded"
           >
             <Shuffle size={18} />
           </button>
-
           <button
             type="button"
             aria-label="Previous track"
-            className="text-white/80 hover:text-white p-2 min-w-0 rounded-full h-auto cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/30"
+            className="text-white/75 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-white/30 rounded"
           >
-            <SkipBack size={20} />
+            <SkipBack size={24} fill="currentColor" className="opacity-90" />
           </button>
-
           <button
             type="button"
-            aria-label={isPlaying ? "Pause track" : "Play track"}
             onClick={togglePlay}
-            className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center hover:scale-105 active:scale-95 shadow-lg cursor-pointer focus:outline-none focus:ring-2 focus:ring-white/50"
+            aria-label={isPlaying ? "Pause" : "Play"}
+            className="w-10 h-10 flex items-center justify-center rounded-full bg-white text-black hover:scale-105 active:scale-95 transition-all focus:outline-none focus:ring-2 focus:ring-white/50"
           >
             {isPlaying ? (
-              <Pause size={18} fill="currentColor" />
+              <Pause size={20} fill="currentColor" />
             ) : (
-              <Play size={18} fill="currentColor" />
+              <Play size={20} fill="currentColor" className="ml-0.5" />
             )}
           </button>
-
           <button
             type="button"
             aria-label="Next track"
-            className="text-white/80 hover:text-white p-2 min-w-0 rounded-full h-auto cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/30"
+            className="text-white/75 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-white/30 rounded"
           >
-            <SkipForward size={20} />
+            <SkipForward size={24} fill="currentColor" className="opacity-90" />
           </button>
-
           <button
             type="button"
-            aria-label="Repeat playback"
-            className="text-white/70 hover:text-white p-2 min-w-0 rounded-full h-auto cursor-pointer focus:outline-none focus:ring-1 focus:ring-white/30"
+            aria-label="Toggle repeat"
+            className="text-white/50 hover:text-white transition-colors focus:outline-none focus:ring-1 focus:ring-white/30 rounded"
           >
             <Repeat size={18} />
           </button>
@@ -132,7 +148,7 @@ export function BottomPlayer() {
         </div>
       </div>
 
-      {/* 3. Extra Actions (Right: Audio Quality + Modular VolumeSlider) */}
+      {/* 3. Extra Actions */}
       <div className="flex items-center justify-end gap-3 w-1/4 min-w-[200px] text-white/70">
         <AudioQualitySelector />
         <VolumeSlider />

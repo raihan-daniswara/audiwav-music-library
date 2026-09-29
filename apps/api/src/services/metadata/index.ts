@@ -1,8 +1,10 @@
 // Export metadata search & detail services.
 export { MetadataSearchService } from "./search";
 
-export { MetadataDetailService } from "./detail";
-export type { MetadataDetailOptions } from "./detail";
+export { SongDetailService } from "./detail/song";
+export type { MetadataDetailOptions } from "./detail/song";
+
+export { AlbumDetailService } from "./detail/album";
 
 // Export shared metadata types.
 export type {
@@ -18,3 +20,4 @@ export {
   parseMetadataQuery,
   tokenizeQuery,
 } from "./common/query";
+export { ArtistDetailService } from "./detail/artist";

@@ -1,18 +1,31 @@
-import { useState } from "react";
 import { NavSection, NavItem } from "./NavItem";
 import {
   SIDEBAR_NAV_SECTIONS,
   SIDEBAR_BOTTOM_ITEMS,
 } from "./navigation.config";
+import { useNavigationStore } from "@/store/useNavigationStore";
 
 export function Sidebar() {
-  const [activeId, setActiveId] = useState("home");
+  const { view, navigate } = useNavigationStore();
+  
+  // Penentuan Highlight Tab Sidebar
+  let activeId = view;
+  if (typeof window !== "undefined") {
+    // Apapun yang berada di bawah urutan /search/... (seperti /search/album/xxx) akan meng-highlight menu Search
+    if (window.location.pathname.startsWith("/search")) {
+      activeId = "search";
+    } 
+    // Apabila view 'album' tapi bukan dari /search/ (misal nanti ada page /albums khusus library), highlight menu Albums
+    else if (view === "album") {
+      activeId = "albums";
+    }
+  }
 
   return (
     <aside className="w-[240px] hidden md:flex flex-col bg-surface/30 border-r border-white/5 backdrop-blur-xl shrink-0 h-full">
       {/* Brand Header */}
       <div className="h-16 flex items-center px-6 shrink-0">
-        <span className="font-bold text-lg tracking-wide text-white">
+        <span className="font-bold text-lg tracking-wide text-white cursor-pointer" onClick={() => navigate("home")}>
           Audiwav
         </span>
       </div>
@@ -24,7 +37,7 @@ export function Sidebar() {
             key={section.title || idx}
             section={section}
             activeId={activeId}
-            onItemClick={setActiveId}
+            onItemClick={(id) => navigate(id)}
           />
         ))}
       </div>
@@ -36,7 +49,7 @@ export function Sidebar() {
             key={item.id}
             item={item}
             isActive={activeId === item.id}
-            onClick={() => setActiveId(item.id)}
+            onClick={() => navigate(item.id)}
           />
         ))}
       </div>

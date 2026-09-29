@@ -57,5 +57,6 @@ export type MetadataSearchResult = NormalizedMetadata;
 
 export interface MetadataSearchOptions {
   limit?: number;
+  type?: "track" | "artist" | "album";
   country?: string;
 }

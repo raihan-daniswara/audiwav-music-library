@@ -2,7 +2,9 @@ import { Hono } from "hono";
 import { z } from "zod";
 
 import {
-  MetadataDetailService,
+  SongDetailService,
+  AlbumDetailService,
+  ArtistDetailService,
   MetadataSearchService,
 } from "../services/metadata";
 import { getArtistImageFromWiki } from "../services/metadata/wikimedia/query";
@@ -57,27 +59,21 @@ metadataRoute.get("/search", async (c) => {
   // Instance murni tanpa injeksi canonical
   const service = new MetadataSearchService();
 
-  if (type === "artist") {
-    const results = await service.searchArtistsRaw(q, limit);
-    return c.json({ results });
-  }
-
-  if (type === "album") {
-    const results = await service.searchAlbumsRaw(q, limit);
-    return c.json({ results });
-  }
-
-  // Jika type === "track" atau default
-  const results = await service.search(q, {
+  const searchOpts = {
     limit,
     country,
-  });
+    type,
+    sources: ["opensearch"] as const,
+  };
+
+  const result = await service.search(q, searchOpts);
 
   return c.json({
-    results,
+    result,
   });
 });
 
+// PENTING: Kembalikan path endpoint menjadi /song/detail agar Frontend tidak 404
 metadataRoute.post("/song/detail", async (c) => {
   const body = await c.req.json().catch(() => ({}));
   const parsed = metadataDetailSchema.safeParse(body);
@@ -85,22 +81,21 @@ metadataRoute.post("/song/detail", async (c) => {
   if (!parsed.success) {
     return c.json(
       {
-        error: "Invalid metadata payload",
+        error: "Invalid payload",
         issues: parsed.error.issues,
       },
       400,
     );
   }
 
-  const detailService = new MetadataDetailService();
-
+  const detailService = new SongDetailService();
   const enriched = await detailService.getDetail(
     {
       title: parsed.data.title,
       artist: parsed.data.artist,
       album: parsed.data.album,
       recordingMbid: parsed.data.recordingMbid,
-      sources: ["opensearch"], // Label sumber berubah dari canonical ke opensearch
+      sources: ["opensearch"], 
     },
     { country: parsed.data.country },
   );
@@ -108,4 +103,38 @@ metadataRoute.post("/song/detail", async (c) => {
   return c.json({
     result: enriched,
   });
+});
+
+metadataRoute.get("/album/detail/:mbid", async (c) => {
+  const mbid = c.req.param("mbid");
+  
+  if (!mbid || mbid.trim() === "") {
+    return c.json({ error: "Missing album MBID" }, 400);
+  }
+
+  const detailService = new AlbumDetailService();
+  const result = await detailService.getAlbumDetail(mbid);
+
+  if ('error' in result) {
+    return c.json(result, 404);
+  }
+
+  return c.json({ result });
+});
+
+metadataRoute.get("/artist/detail/:mbid", async (c) => {
+  const mbid = c.req.param("mbid");
+  
+  if (!mbid || mbid.trim() === "") {
+    return c.json({ error: "Missing artist MBID" }, 400);
+  }
+
+  const detailService = new ArtistDetailService();
+  const result = await detailService.getArtistDetail(mbid);
+
+  if ('error' in result) {
+    return c.json(result, 404);
+  }
+
+  return c.json({ result });
 });

@@ -1,14 +1,14 @@
 import { logger } from "@audiwav/logger";
 import { getTrackDetailFromDB } from "@audiwav/metadata";
 import type { TrackDetailResponse } from "@audiwav/metadata";
-import { getArtistImageFromWiki } from "./wikimedia/query";
-import type { NormalizedMetadata } from "./common/types";
+import { getArtistImageFromWiki } from "../wikimedia/query";
+import type { NormalizedMetadata } from "../common/types";
 
 export interface MetadataDetailOptions {
   country?: string;
 }
 
-export class MetadataDetailService {
+export class SongDetailService {
   async getDetail(
     candidate: NormalizedMetadata,
     options: MetadataDetailOptions = {},
@@ -24,7 +24,7 @@ export class MetadataDetailService {
     try {
        logger.debug({ mbid }, "Fetching rich metadata payload directly from PostgreSQL...");
        
-       const payload = await getTrackDetailFromDB(mbid);
+       const payload = (await getTrackDetailFromDB(mbid)) as any;
        
        if (!payload) {
          logger.warn({ mbid }, "Track MBID not found in PostgreSQL Database!");

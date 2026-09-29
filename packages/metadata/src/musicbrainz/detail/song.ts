@@ -1,7 +1,6 @@
 import { logger } from "@audiwav/logger";
-import { mbClient } from "./client";
-
-import type { TrackDetailResponse } from "./types";
+import { mbClient } from "../client";
+import type { TrackDetailResponse } from "../types";
 
 export async function getTrackDetailFromDB(mbid: string): Promise<TrackDetailResponse | null> {
   try {

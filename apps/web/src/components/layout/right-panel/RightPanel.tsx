@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePlayerStore, useSongDetail } from "../../../features/player";
-import { useSongLyrics } from "../../../features/lyrics";
+import { usePlayerStore, useSongDetail } from "@/features/player";
+import { useSongLyrics } from "@/features/lyrics";
 import { Music } from "lucide-react";
 
 import { TrackHeader } from "./TrackHeader";
@@ -20,7 +20,9 @@ export function RightPanel() {
     currentTrack?.artist,
   );
 
-  const rawArtwork = detailData?.album?.artwork?.url || currentTrack?.artworkUrl;
+  // Kunci cover art prioritas utama ke currentTrack agar gambar yang sedang tampil 
+  // tidak lompat berganti kalau SQL membawa mbid rilis album berlabel kompilasi/berbeda.
+  const rawArtwork = currentTrack?.artworkUrl || detailData?.album?.artwork?.url;
   const [imageError, setImageError] = useState(false);
 
   // Reset error state saat track berganti
@@ -47,16 +49,25 @@ export function RightPanel() {
   const artwork = imageError ? null : rawArtwork;
   const artistArtwork = detailData?.artists?.[0]?.artwork?.url;
 
-  // Data mapping langsung dari SQL MusicBrainz
-  const tags = detailData?.track?.tags || [];
-  const trackTitle = detailData?.track?.title || currentTrack.title;
-  const artistName = detailData?.artists?.[0]?.name || currentTrack.artist;
-
-  // Album info
-  const albumName = detailData?.album?.name;
-  const releaseYear = detailData?.album?.firstReleaseDate
-    ? detailData.album.firstReleaseDate.split("-")[0]
+  // PRIORITASKAN SEMUA DATA AWAL DARI PLAYER (Agar UI tidak lompat/berubah setelah query SQL selesai)
+  // karena "recording" di database bisa tertaut ke banyak "release/album" yang berbeda-beda.
+  const trackTitle = currentTrack.title || detailData?.track?.title;
+  const artistName = currentTrack.artist || detailData?.artists?.[0]?.name;
+  
+  const albumName = currentTrack.album || detailData?.album?.name;
+  const albumMbid = currentTrack.mbid || detailData?.album?.mbid; 
+  
+  // Amankan pembacaan data dinamis tanpa Error TS
+  const currentTrackAny = currentTrack as any;
+  const releaseYear = currentTrackAny.releaseYear || detailData?.album?.firstReleaseDate
+    ? (currentTrackAny.releaseYear?.toString() || detailData?.album?.firstReleaseDate?.split("-")[0])
     : null;
+
+  // Gabungkan genre dari currentTrack (kalau ada) dan tags dari DB
+  let tags = detailData?.track?.tags || [];
+  if (currentTrackAny.genre && tags.length === 0) {
+     tags = [{ name: currentTrackAny.genre }];
+  }
 
   // ISRC / technical info
   const isrcList = detailData?.track?.isrc || [];
@@ -65,11 +76,10 @@ export function RightPanel() {
   const annotation = detailData?.artists?.[0]?.annotation;
 
   // Kunci unik untuk memicu transisi track baru
-  const trackKey = (currentTrack as any).recordingMbid || currentTrack.id || currentTrack.title;
+  const trackKey = currentTrackAny.recordingMbid || currentTrack.id || currentTrack.title;
 
   return (
     <aside className="w-[320px] lg:w-[400px] hidden xl:flex flex-col border-l border-white/5 shrink-0 h-full overflow-hidden relative">
-      {/* Background artwork blur di belakang dengan transisi crossfade halus */}
       <AnimatePresence mode="wait">
         {artwork && (
           <motion.div
@@ -94,7 +104,6 @@ export function RightPanel() {
         )}
       </AnimatePresence>
 
-      {/* Kontainer scroll dengan animasi masuk bergantian (staggered cascade) */}
       <div className="absolute inset-0 overflow-y-auto overflow-x-hidden p-4 pb-12 flex flex-col gap-6 custom-scrollbar z-10">
         <AnimatePresence mode="wait">
           <motion.div
@@ -105,60 +114,37 @@ export function RightPanel() {
             transition={{ duration: 0.25 }}
             className="flex flex-col gap-6"
           >
-            {/* 1. Track & Album Header */}
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut", delay: 0.05 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.05, ease: "easeOut" }}>
               <TrackHeader
-                artwork={artwork}
-                rawArtwork={rawArtwork}
-                trackTitle={trackTitle}
-                artistName={artistName}
+                artwork={artwork || undefined}
+                rawArtwork={rawArtwork || undefined}
+                trackTitle={trackTitle || "Unknown Track"}
+                artistName={artistName || "Unknown Artist"}
                 albumName={albumName}
+                albumMbid={albumMbid}
                 releaseYear={releaseYear}
                 isLoadingDetail={isLoadingDetail}
                 onImageError={() => setImageError(true)}
               />
             </motion.div>
 
-            {/* 2. Audio Tags & Mini Badges */}
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.35, ease: "easeOut", delay: 0.1 }}
-            >
-              <TrackTags
-                tags={tags}
-                isrcList={isrcList}
-                isLoadingDetail={isLoadingDetail}
-              />
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.1, ease: "easeOut" }}>
+              <TrackTags tags={tags} isrcList={isrcList} isLoadingDetail={isLoadingDetail} />
             </motion.div>
 
-            {/* 3. Lyrics Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: "easeOut", delay: 0.15 }}
-            >
-              <LyricsCard
-                plainLyrics={lyricsData?.plainLyrics}
-                isLoadingLyrics={isLoadingLyrics}
-              />
-            </motion.div>
-
-            {/* 4. About the Artist Card */}
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: "easeOut", delay: 0.2 }}
-            >
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.15, ease: "easeOut" }}>
               <ArtistCard
-                artistName={artistName}
+                artistName={artistName || "Unknown"}
                 artistArtwork={artistArtwork}
                 annotation={annotation}
                 isLoadingDetail={isLoadingDetail}
+              />
+            </motion.div>
+
+            <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35, delay: 0.2, ease: "easeOut" }}>
+              <LyricsCard
+                plainLyrics={lyricsData?.lyrics || lyricsData?.plainLyrics}
+                isLoadingLyrics={isLoadingLyrics}
               />
             </motion.div>
           </motion.div>

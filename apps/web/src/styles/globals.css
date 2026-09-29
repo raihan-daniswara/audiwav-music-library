@@ -106,6 +106,15 @@
   }
 }
 
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .animate-orbit-slow {
   animation: ambient-orbit-1 25s ease-in-out infinite;
 }
@@ -116,4 +125,8 @@
 
 .animate-orbit-medium {
   animation: ambient-orbit-3 22s ease-in-out infinite;
+}
+
+.animate-spin-slow {
+  animation: spin-slow 60s linear infinite;
 }

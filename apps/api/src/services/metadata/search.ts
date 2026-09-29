@@ -6,16 +6,46 @@ import type { MetadataSearchOptions, MetadataSearchResult, NormalizedMetadata } 
 import { getArtistImageFromWiki } from "./wikimedia/query";
 
 export class MetadataSearchService {
-  async search(query: string, options: MetadataSearchOptions = {}): Promise<MetadataSearchResult[]> {
+  async search(query: string, options: MetadataSearchOptions = {}): Promise<any[]> {
     const parsedQuery = parseMetadataQuery(query);
     if (!parsedQuery.normalized) return [];
 
     const limit = Math.min(options.limit ?? 10, 50);
+    const type = options.type || "track";
+    
+    logger.debug({ query, normalizedQuery: parsedQuery.normalized, limit, type }, "Starting metadata search");
+
+    // Tangani pencarian berdasarkan tipe
+    if (type === "artist") {
+      try {
+        const osArtists = await searchArtists(parsedQuery.normalized, limit);
+        // Enrich artists with Wiki images if needed
+        const enrichedArtists = await Promise.all(
+          osArtists.map(async (artist) => {
+            if (!artist.artworkUrl) {
+               // artist.artworkUrl = await getArtistImageFromWiki(artist.mbid);
+            }
+            return artist;
+          })
+        );
+        return enrichedArtists;
+      } catch (error) {
+        logger.error({ err: error, type }, "OpenSearch artist search failed");
+        return [];
+      }
+    }
+
+    if (type === "album") {
+      try {
+        return await searchAlbums(parsedQuery.normalized, limit);
+      } catch (error) {
+        logger.error({ err: error, type }, "OpenSearch album search failed");
+        return [];
+      }
+    }
+
+    // Default: Pencarian TRACK (Lagu)
     let results: NormalizedMetadata[] = [];
-
-    logger.debug({ query, normalizedQuery: parsedQuery.normalized, limit }, "Starting metadata search");
-
-    // Primary Source: OpenSearch (Database Lokal)
     try {
       const osResults = await searchTracks(parsedQuery.normalized, limit);
       results = osResults.map(normalizeOpenSearchTrack);
@@ -23,7 +53,7 @@ export class MetadataSearchService {
       logger.error({ err: error, provider: "opensearch", query: parsedQuery.normalized }, "OpenSearch lookup failed");
     }
 
-    // Fallback: iTunes
+    // Fallback iTunes untuk Track
     if (results.length === 0) {
       try {
         const itunesClient = new ITunesClient(options.country ?? "us");
@@ -39,22 +69,10 @@ export class MetadataSearchService {
     return deduplicatedResults.slice(0, limit);
   }
 
-  // ==== METHOD BARU: Pencarian Spesifik ====
+  // ==== PENCARIAN SPESIFIK ====
   async searchArtistsRaw(query: string, limit: number = 10) {
     const osArtists = await searchArtists(query, limit);
-    
-    // Enrich with Wikimedia images in parallel
-    const enrichedArtists = await Promise.all(
-      osArtists.map(async (artist) => {
-        const artworkUrl = await getArtistImageFromWiki(artist.mbid);
-        return {
-          ...artist,
-          artworkUrl
-        };
-      })
-    );
-
-    return enrichedArtists;
+    return osArtists;
   }
 
   async searchAlbumsRaw(query: string, limit: number = 10) {

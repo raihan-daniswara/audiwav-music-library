@@ -1,5 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Music, Disc3 } from "lucide-react";
+import { useNavigationStore } from "@/store/useNavigationStore";
+import { useSearchStore } from "@/features/search";
 
 interface TrackHeaderProps {
   artwork: string | null;
@@ -7,6 +9,7 @@ interface TrackHeaderProps {
   trackTitle: string;
   artistName: string;
   albumName?: string;
+  albumMbid?: string;
   releaseYear?: string | null;
   isLoadingDetail: boolean;
   onImageError: () => void;
@@ -18,14 +21,36 @@ export function TrackHeader({
   trackTitle,
   artistName,
   albumName,
+  albumMbid,
   releaseYear,
   isLoadingDetail,
   onImageError,
 }: TrackHeaderProps) {
+  const navigate = useNavigationStore((state) => state.navigate);
+  const setQuery = useSearchStore((state) => state.setQuery);
+
+  const handleArtistClick = (keyword: string) => {
+    setQuery(keyword);
+    navigate("search");
+  };
+
+  const handleAlbumClick = () => {
+    if (albumMbid) {
+      navigate("album", albumMbid);
+    } else if (albumName) {
+      setQuery(`${albumName} album`);
+      navigate("search");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-4 shrink-0">
-      {/* Artwork dengan transisi halus dari Skeleton / Placeholder ke Gambar */}
-      <div className="relative w-full aspect-square rounded-[12px] overflow-hidden border border-white/5 shadow-2xl">
+      {/* Artwork dengan transisi halus */}
+      <div
+        onClick={handleAlbumClick}
+        className="relative w-full aspect-square rounded-[12px] overflow-hidden border border-white/5 shadow-2xl cursor-pointer hover:opacity-90 transition-opacity"
+        role="button"
+      >
         <AnimatePresence mode="wait">
           {artwork ? (
             <motion.img
@@ -65,12 +90,18 @@ export function TrackHeader({
 
       <div className="flex items-start justify-between px-1">
         <div className="flex flex-col min-w-0 flex-1 pr-2">
-          <h2 className="text-2xl font-bold tracking-tight text-white hover:underline cursor-pointer break-words">
+          <h2
+            onClick={handleAlbumClick}
+            className="text-2xl font-bold tracking-tight text-white hover:underline cursor-pointer break-words"
+          >
             {trackTitle}
           </h2>
 
           <div className="flex items-center gap-1.5 flex-wrap mt-1">
-            <p className="text-white/60 font-medium text-sm hover:underline cursor-pointer hover:text-white transition-colors">
+            <p
+              onClick={() => handleArtistClick(artistName)}
+              className="text-white/60 font-medium text-sm hover:underline cursor-pointer hover:text-white transition-colors"
+            >
               {artistName}
             </p>
 
@@ -86,7 +117,10 @@ export function TrackHeader({
                   className="flex items-center gap-1.5"
                 >
                   <span className="text-white/30 text-xs">•</span>
-                  <p className="text-white/40 font-medium text-sm hover:underline cursor-pointer hover:text-white/80 transition-colors flex items-center gap-1">
+                  <p
+                    onClick={handleAlbumClick}
+                    className="text-white/40 font-medium text-sm hover:underline cursor-pointer hover:text-white/80 transition-colors flex items-center gap-1"
+                  >
                     <Disc3 size={12} />
                     {albumName}
                   </p>
