@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { SearchResultItem } from "../types";
+import type { SearchResultItem } from "@/features/search/api/types";
 
 export const useSearchMetadata = (
   query: string,

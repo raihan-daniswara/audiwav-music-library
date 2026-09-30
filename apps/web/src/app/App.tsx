@@ -1,11 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { AppShell } from "../components/layout/AppShell";
-import { useSearchStore } from "../features/search";
-import { SearchPage } from "../pages/search/SearchPage";
-import { AlbumPage } from "../pages/albums/AlbumPage";
-import { ArtistPage } from "../pages/artists/ArtistPage";
-import { HomePage } from "../pages/home/HomePage";
-import { useNavigationStore } from "../store/useNavigationStore";
+import { AppShell } from "@/components/layout/AppShell";
+import { useSearchStore } from "@/features/search";
+import { SearchPage } from "@/pages/search/SearchPage";
+import { AlbumPage } from "@/pages/albums/AlbumPage";
+import { ArtistPage } from "@/pages/artists/ArtistPage";
+import { HomePage } from "@/pages/home/HomePage";
+import { useNavigationStore } from "@/store/useNavigationStore";
 
 export default function App() {
   const query = useSearchStore((state) => state.query);

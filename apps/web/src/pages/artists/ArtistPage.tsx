@@ -1,9 +1,9 @@
 import { UserCircle2, ArrowLeft } from "lucide-react";
-import { useArtistDetail } from "../../features/artist/api/queries/useArtistDetail";
-import { ArtistHeader } from "../../features/artist/components/ArtistHeader";
-import { ArtistTopTracks } from "../../features/artist/components/ArtistTopTracks";
-import { ArtistAlbums } from "../../features/artist/components/ArtistAlbums";
-import { ArtistBackground } from "../../features/artist/components/ArtistBackground";
+import { useArtistDetail } from "@/features/artist/api/queries/useArtistDetail";
+import { ArtistHeader } from "@/features/artist/components/ArtistHeader";
+import { ArtistTopTracks } from "@/features/artist/components/ArtistTopTracks";
+import { ArtistAlbums } from "@/features/artist/components/ArtistAlbums";
+import { ArtistBackground } from "@/features/artist/components/ArtistBackground";
 
 interface ArtistPageProps {
   mbid: string;

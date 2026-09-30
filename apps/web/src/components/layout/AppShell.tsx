@@ -1,8 +1,8 @@
-import { Sidebar } from "./sidebar";
-import { Topbar } from "./topbar";
-import { MainContent } from "./main-content";
-import { BottomPlayer } from "./bottom-player";
-import { RightPanel } from "./right-panel";
+import { Sidebar } from "@/components/layout/sidebar";
+import { Topbar } from "@/components/layout/topbar";
+import { MainContent } from "@/components/layout/main-content";
+import { BottomPlayer } from "@/components/layout/bottom-player";
+import { RightPanel } from "@/components/layout/right-panel";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (

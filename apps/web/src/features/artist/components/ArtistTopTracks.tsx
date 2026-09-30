@@ -1,4 +1,4 @@
-import { Play, Music } from "lucide-react";
+import { Play } from "lucide-react";
 import { usePlayerStore } from "@/features/player/store";
 import { ImgWithFallback } from "@/features/search/components/ImgWithFallback";
 
@@ -20,7 +20,7 @@ export function ArtistTopTracks({ tracks }: ArtistTopTracksProps) {
   if (!tracks || tracks.length === 0) return null;
 
   return (
-    <div className="flex flex-col gap-4 mt-8 relative z-10 w-full max-w-5xl">
+    <div className="flex flex-col gap-4 mt-8 relative z-10 w-full ">
       <h2 className="text-xl font-bold text-white mb-2">Popular Tracks</h2>
 
       <div className="flex flex-col divide-y divide-white/[0.05]">
@@ -85,8 +85,8 @@ export function ArtistTopTracks({ tracks }: ArtistTopTracksProps) {
               </div>
 
               {track.albumName && (
-                <div className="text-xs text-white/60 truncate hidden md:block max-w-[150px] lg:max-w-[200px]">
-                  {track.albumName}
+                <div className="text-xs text-white/60 truncate hidden md:block max-w-[150px] lg:max-w-[300px]">
+                    {track.albumName}
                 </div>
               )}
 

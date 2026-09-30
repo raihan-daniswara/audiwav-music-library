@@ -1,5 +1,5 @@
 import { Search, X } from "lucide-react";
-import { useSearchStore } from "../../../features/search";
+import { useSearchStore } from "@/features/search";
 
 export function Topbar() {
   const { query, setQuery, clearQuery } = useSearchStore();

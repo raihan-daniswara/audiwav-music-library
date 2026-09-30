@@ -1,6 +1,6 @@
 import { useMemo } from "react";
-import { useSearchStore } from "../store";
-import { useSearchMetadata, type SearchResultItem } from "../api";
+import { useSearchStore } from "@/features/search/store";
+import { useSearchMetadata, type SearchResultItem } from "@/features/search/api";
 import { useDebounce } from "@/hooks/useDebounce";
 import { SongsSection } from "./SongsSection";
 import { ArtistsSection } from "./ArtistsSection";

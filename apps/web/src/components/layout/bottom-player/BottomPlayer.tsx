@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { usePlayerStore } from "../../../features/player";
-import { useSearchStore } from "../../../features/search";
-import { useNavigationStore } from "../../../store/useNavigationStore";
+import { usePlayerStore } from "@/features/player";
+import { useSearchStore } from "@/features/search";
+import { useNavigationStore } from "@/store/useNavigationStore";
 import { AudioQualitySelector } from "./AudioQualitySelector";
 import { VolumeSlider } from "./VolumeSlider";
 import {

@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useArtistArtwork } from "../api/queries/useArtistDetail";
+import { useArtistArtwork } from "@/features/artist/api/queries/useArtistDetail";
 
 interface ArtistBackgroundProps {
   mbid?: string;

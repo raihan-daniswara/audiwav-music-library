@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { SearchResultItem } from "../../../search";
+import type { SearchResultItem } from "@/features/search";
 
 export const useSongDetail = (track: SearchResultItem | null) => {
   const trackId = (track as any)?.recordingMbid || (track as any)?.mbid || track?.id;

@@ -5,7 +5,7 @@ import {
   AUDIO_QUALITY_PRESETS,
   type AudioQualityId,
   type AudioQualityPreset,
-} from "../../../features/player";
+} from "@/features/player";
 import { SlidersHorizontal, Check, ChevronUp } from "lucide-react";
 
 export function AudioQualitySelector() {

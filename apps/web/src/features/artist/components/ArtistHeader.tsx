@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Mic2, Calendar, MapPin } from "lucide-react";
-import { useArtistArtwork } from "../api/queries/useArtistDetail";
+import { useArtistArtwork } from "@/features/artist/api/queries/useArtistDetail";
 
 interface ArtistHeaderProps {
   artist: any;

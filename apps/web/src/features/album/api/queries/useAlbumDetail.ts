@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import type { AlbumDetailResponse } from "../types";
+import type { AlbumDetailResponse } from "@/features/album/api/types";
 
 export const useAlbumDetail = (mbid: string | undefined) => {
   return useQuery({

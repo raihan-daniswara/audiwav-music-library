@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { usePlayerStore } from "../../../features/player";
+import { usePlayerStore } from "@/features/player";
 import { Volume2, VolumeX } from "lucide-react";
 
 const BAR_COUNT = 18;

@@ -81,7 +81,7 @@ export function AlbumHeader({ album, tracks, albumArtist }: AlbumHeaderProps) {
         {album.tags && album.tags.length > 0 && (
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-2 mt-3">
             {album.tags.slice(0, 4).map((tag: any, idx: number) => (
-              <span key={idx} className="px-2 py-0.5 rounded-md bg-white/5 border border-white/10 text-[11px] text-white/70 font-medium capitalize">
+              <span key={idx} className="text-[10px] font-bold tracking-widest uppercase text-white/50 bg-white/5 px-2 py-1 rounded opacity-75 hover:opacity-100 cursor-pointer transition-opacity">
                  {tag.name}
               </span>
             ))}

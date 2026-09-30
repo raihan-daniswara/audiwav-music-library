@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { SearchResultItem } from "../../search";
+import type { SearchResultItem } from "@/features/search";
 
 export type AudioQualityId =
   | "HI_RES_192"

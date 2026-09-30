@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { Disc3, ArrowLeft } from "lucide-react";
 import { useAlbumDetail } from "@/features/album/api/queries/useAlbumDetail";
 import { AlbumBackground } from "@/features/album/components/AlbumBackground";
@@ -12,13 +11,6 @@ export function AlbumPage({
   mbid: string;
   onBack: () => void;
 }) {
-  // Reset scroll
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    document.documentElement.scrollTop = 0;
-    document.body.scrollTop = 0;
-  }, []);
-
   const { data: detail, isLoading, error } = useAlbumDetail(mbid);
 
   if (isLoading) {
@@ -58,15 +50,15 @@ export function AlbumPage({
 
   const { album, artists, tracks } = detail;
   const albumArtist =
-    artists.map((a: any) => a.name).join(", ") || "Unknown Artist";
+    artists && artists.length > 0
+      ? artists[0]?.name || "Unknown Artist"
+      : "Unknown Artist";
 
   return (
-    <div className="relative min-h-[calc(100vh-2rem)] pb-24">
-      {/* Background artwork blur */}
-      <AlbumBackground artworkUrl={album.artwork?.url} />
+    <div className="relative min-h-full pb-12">
+      <AlbumBackground artworkUrl={album?.artwork?.url} />
 
-      <div className="relative z-10 flex flex-col gap-4 px-6 pt-6">
-        {/* Tombol Back */}
+      <div className="relative z-10 p-6 sm:p-8 flex flex-col gap-8">
         <div className="flex items-center gap-2 text-white/70 font-medium">
           <button
             onClick={onBack}
@@ -77,13 +69,15 @@ export function AlbumPage({
           <span>Album</span>
         </div>
 
-        {/* Album Meta */}
-        <AlbumHeader album={album} tracks={tracks} albumArtist={albumArtist} />
+        <AlbumHeader
+          album={album!}
+          tracks={tracks || []}
+          albumArtist={albumArtist}
+        />
 
-        {/* Tracks Table */}
         <AlbumTrackList
-          tracks={tracks}
-          album={album}
+          tracks={tracks || []}
+          album={album!}
           albumArtist={albumArtist}
         />
       </div>
